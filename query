@@ -1,0 +1,307 @@
+SQL Query 
+1.	Add component into component page ( i.e.) 30.196.132.42
+2.	Check table 
+MariaDB [panaces]> select uac_id, uac_csa_id, uac_c_id, uac_sc_id, uac_ac_ipaddress from uni_agent_csa where uac_ac_ipaddress='30.196.132.42';
++--------+------------+----------+-----------+------------------+
+| uac_id | uac_csa_id | uac_c_id | uac_sc_id | uac_ac_ipaddress |
++--------+------------+----------+-----------+------------------+
+|    720 |        218 |      747 |        17 | 30.196.132.42    |
+				
+3.	Now check Uni 218 if this ip shows into it 
+MariaDB [panaces]> select * from uni_agent_csa where uac_csa_id=218;
++--------+------------+----------+-----------+------------+------------+------------------+------------------+---------------------+
+| uac_id | uac_csa_id | uac_c_id | uac_sc_id | uac_ssa_id | uac_org_id | uac_ac_ipaddress | uac_ac_displayIP | uac_c_managed_state |
++--------+------------+----------+-----------+------------+------------+------------------+------------------+---------------------+
+|    720 |        218 |      747 |        17 |          2 |          1 | 30.196.132.42    | 30.196.132.42    |                   1 |
++--------+------------+----------+-----------+------------+------------+------------------+------------------+------------
+4.	Now go to agent page if UNI 218 started , If not then delete ip 30.196.132.42 from component and add some different range until UNI start on agent page. 
+
+
+5.	To check orphan ip’s which are not in any UNI
+select c_name,c_ipaddr,c_refcnt from component where c_id in (select uac_c_id from uni_agent_csa group by uac_csa_id having count(*)=1) and c_refcnt=0;
+desc uni_agent_csa;
+select * from uni_agent_csa where uac_csa_id=52;
+6.	If connector ip is not showing correct 
+MariaDB [panaces]> select ac_id,ac_ipaddress,ac_sitecontroller_id,ac_anode_ip,ac_connectorIP from agent_csa where ac_ipaddress='30.167.97.188';
++-------+---------------+----------------------+---------------+----------------+
+| ac_id | ac_ipaddress  | ac_sitecontroller_id | ac_anode_ip   | ac_connectorIP |
++-------+---------------+----------------------+---------------+----------------+
+|    67 | 30.167.97.188 |                   17 | 30.117.150.13 | NULL           |
++-------+---------------+----------------------+---------------+----------------+
+
+7.	To correct it 
+MariaDB [panaces]> update agent_csa set ac_connectorIP='30.167.97.188' where ac_id=67;
+Query OK, 1 row affected (0.00 sec)
+
+Rows matched: 1  Changed: 1  Warnings: 0
+
+MariaDB [panaces]> select ac_id,ac_ipaddress,ac_sitecontroller_id,ac_anode_ip,ac_connectorIP from agent_csa where ac_ipaddress='30.167.97.188';
++-------+---------------+----------------------+---------------+----------------+
+| ac_id | ac_ipaddress  | ac_sitecontroller_id | ac_anode_ip   | ac_connectorIP |
++-------+---------------+----------------------+---------------+----------------+
+|    67 | 30.167.97.188 |                   17 | 30.117.150.13 | 30.167.97.188  |
++-------+---------------+----------------------+---------------+----------------+
+1 row in set (0.00 sec)
+8.	To check more Desc component
+9.	
+MariaDB [panaces]> select uac_id, uac_csa_id, uac_c_id, uac_sc_id, uac_ac_ipaddress from uni_agent_csa where uac_ac_ipaddress='30.196.164.36';
++--------+------------+----------+-----------+------------------+
+| uac_id | uac_csa_id | uac_c_id | uac_sc_id | uac_ac_ipaddress |
++--------+------------+----------+-----------+------------------+
+|    591 |         51 |      618 |        17 | 30.196.164.36    |
++--------+------------+----------+-----------+------------------+
+1 row in set (0.00 sec)
+
+MariaDB [panaces]> select uac_id, uac_csa_id, uac_c_id, uac_sc_id, uac_ac_ipaddress from uni_agent_csa where uac_csa_id=51;
++--------+------------+----------+-----------+------------------+
+| uac_id | uac_csa_id | uac_c_id | uac_sc_id | uac_ac_ipaddress |
++--------+------------+----------+-----------+------------------+
+|    310 |         51 |      335 |        17 | 30.167.96.185    |
+
+10.	desc uni_agent_csa;
+11.	select uac_id, uac_csa_id, uac_c_id, uac_sc_id, uac_ac_ipaddress from uni_agent_csa where uac_ac_ipaddress='30.196.164.36';
+desc agent_csa;
+select ac_id,ac_ipaddress,ac_sitecontroller_id,ac_anode_ip from agent_csa where ac_id=51;
+
+select c_id,c_sub_id,c_name,c_ipaddr,c_display_ipaddr,c_SiteController_id from component where c_name='Win_DR_30.166.132.13’;
+
+MariaDB [panaces]> select c_id,c_sub_id,c_name,c_ipaddr,c_display_ipaddr,c_SiteController_id from component where c_name='Win_DR_30.196.164.36';
+30.166.132.13
++------+----------+----------------------+---------------+------------------+---------------------+
+| c_id | c_sub_id | c_name               | c_ipaddr      | c_display_ipaddr | c_SiteController_id |
++------+----------+----------------------+---------------+------------------+---------------------+
+|  618 |        1 | Win_DR_30.196.164.36 | 30.196.164.36 | 30.196.164.36    |                  17 |
++------+----------+----------------------+---------------+------------------+---------------------+
+1 row in set (0.02 sec)
+Where 17 is site controller 
+
+*********************How to change Site controller id on all or one ip*********
+Lets assume one UNI 13 …gather all ip’s inside that UNI ..seperate by , 
+
+
+
+
+MariaDB [panaces]> desc uni_agent_csa;
++---------------------+--------------+------+-----+---------+----------------+
+| Field               | Type         | Null | Key | Default | Extra          |
++---------------------+--------------+------+-----+---------+----------------+
+| uac_id              | int(11)      | NO   | PRI | NULL    | auto_increment |
+| uac_csa_id          | int(11)      | NO   |     | NULL    |                |
+| uac_c_id            | int(11)      | NO   | MUL | NULL    |                |
+| uac_sc_id           | int(11)      | NO   |     | NULL    |                |
+| uac_ssa_id          | int(11)      | NO   |     | NULL    |                |
+| uac_org_id          | int(11)      | YES  |     | NULL    |                |
+| uac_ac_ipaddress    | varchar(255) | YES  |     | NULL    |                |
+| uac_ac_displayIP    | varchar(255) | YES  |     | NULL    |                |
+| uac_c_managed_state | tinyint(4)   | YES  |     | 1       |                |
++---------------------+--------------+------+-----+---------+----------------+
+
+
+
+MariaDB [panaces]> select * from uni_agent_csa where uac_csa_id=13;
++--------+------------+----------+-----------+------------+------------+------------------+------------------+---------------------+
+| uac_id | uac_csa_id | uac_c_id | uac_sc_id | uac_ssa_id | uac_org_id | uac_ac_ipaddress | uac_ac_displayIP | uac_c_managed_state |
++--------+------------+----------+-----------+------------+------------+------------------+------------------+---------------------+
+|     26 |         13 |       44 |         0 |          2 |          1 | 30.166.132.13    | 30.166.132.13    |                   1 |
+|     27 |         13 |       45 |         0 |          2 |          1 | 30.166.132.14    | 30.166.132.14    |                   1 |
+|     28 |         13 |       46 |         0 |          2 |          1 | 30.166.132.15    | 30.166.132.15    |                   1 |
+|     29 |         13 |       47 |         0 |          2 |          1 | 30.166.132.16    | 30.166.132.16    |                   1 |
+|     30 |         13 |       48 |         0 |          2 |          1 | 30.166.132.17    | 30.166.132.17    |                   1 |
+|     31 |         13 |       49 |         0 |          2 |          1 | 30.166.132.18    | 30.166.132.18    |                   1 |
+|     32 |         13 |       50 |         0 |          2 |          1 | 30.166.132.19    | 30.166.132.19    |                   1 |
+
+
+You see uac_sc_id=0 for all ips in UNI 13. Change it to 2 for site controller id 
+
+
+MariaDB [panaces]> update uni_agent_csa set uac_sc_id=2 where uac_csa_id=13;
+Query OK, 25 rows affected (0.00 sec)
+Rows matched: 25  Changed: 25  Warnings: 0
+
+MariaDB [panaces]> select * from uni_agent_csa where uac_csa_id=13;
++--------+------------+----------+-----------+------------+------------+------------------+------------------+---------------------+
+| uac_id | uac_csa_id | uac_c_id | uac_sc_id | uac_ssa_id | uac_org_id | uac_ac_ipaddress | uac_ac_displayIP | uac_c_managed_state |
++--------+------------+----------+-----------+------------+------------+------------------+------------------+---------------------+
+|     26 |         13 |       44 |         2 |          2 |          1 | 30.166.132.13    | 30.166.132.13    |                   1 |
+|     27 |         13 |       45 |         2 |          2 |          1 | 30.166.132.14    | 30.166.132.14    |                   1 |
+|     28 |         13 |       46 |         2 |          2 |          1 | 30.166.132.15    | 30.166.132.15    |                   1 |
+|     29 |         13 |       47 |         2 |          2 |          1 | 30.166.132.16    | 30.166.132.16    |                   1 |
+|     30 |         13 |       48 |         2 |          2 |          1 | 30.166.132.17    | 30.166.132.17    |                   1 |
+
+Now lets say you want to change sitcontroller id for all components 
+
+MariaDB [panaces]> update component set c_SiteController_id=2 where c_ipaddr in ('30.96.19.42','30.96.19.43','30.96.19.44','30.96.19.45','30.96.19.447','30.96.19.48','30.96.19.49','30.96.19.50','30.96.48.12');
+Query OK, 10 rows affected (0.00 sec)
+
+This will show all ip's updated with sitcontroller id 2 
+MariaDB [panaces]> select c_id,c_name,c_ipaddr,c_SiteController_id from component where  c_ipaddr in ('30.96.19.42','30.96.19.43','30.96.19.44','30..96.19.46','30.96.19.47','30.96.19.48','30.96.19.49','30.96.19.50','30.96.48.12');
++------+--------------------+-------------+---------------------+
+| c_id | c_name             | c_ipaddr    | c_SiteController_id |
++------+--------------------+-------------+---------------------+
+|  169 | Win_DR_30.96.19.42 | 30.96.19.42 |                   2 |
+|  170 | Win_DR_30.96.19.43 | 30.96.19.43 |                   2 |
+|  171 | Win_DR_30.96.19.44 | 30.96.19.44 |                   2 |
+|  172 | Win_DR_30.96.19.45 | 30.96.19.45 |                   2 |
+|  173 | Win_DR_30.96.19.46 | 30.96.19.46 |                   2 |
+|  174 | Win_DR_30.96.19.47 | 30.96.19.47 |                   2 |
+|  175 | Win_DR_30.96.19.48 | 30.96.19.48 |                   2 |
+|  176 | Win_DR_30.96.19.49 | 30.96.19.49 |                   2 |
+|  177 | Win_DR_30.96.19.50 | 30.96.19.50 |                   2 |
+|  178 | Win_DR_30.96.48.12 | 30.96.48.12 |                   2 |
++------+--------------------+-------------+---------------------+
+
+
+Now if you want to update all Components sitecontroller id = 2 then 
+
+First check all win and lnx components should have id=2 
+MariaDB [panaces]> select c_id,c_name,c_ipaddr,c_SiteController_id from component;
++------+-------------------------+------------------+---------------------+
+| c_id | c_name                  | c_ipaddr         | c_SiteController_id |
++------+-------------------------+------------------+---------------------+
+|    1 | __c_other_repl_pri      | 0.0.0.0          |                NULL |
+|    2 | __c_other_repl_dr       | 0.0.0.1          |                NULL |
+|    3 | __c_other_ds_pri        | 0.0.0.2          |                NULL |
+|    4 | __c_other_ds_dr         | 0.0.0.3          |                NULL |
+|    5 | AgentNode               | 30.117.171.11    |                NULL |
+|   12 | HSB_WIN_Site_Controller | 30.117.171.14    |                   2 |
+|   13 | VM_VA22PWVTSM324_0      | 169.254.225.23   |                   0 |
+|   14 | VM_VA22PWVISS010_0      | 10.100.120.22    |                   0 |
+|   15 | VM_DR_VA22PWVISS010_37  | 10.100.120.22_1  |                   0 |
+|   16 | VM_DR_VA22PWVTSM324_47  | 169.254.225.23_1 |                   0 |
+|   17 | VM_VA1EDI01_0           | 10.100.106.30    |                   0 |
+|   18 | VM_DR_VA1EDI01_62       | 10.100.106.30_1  |                   0 |
+|   19 | Win_DR_30.116.72.75     | 30.116.72.75     |                   2 |
+|   20 | Win_DR_30.166.1.127     | 30.166.1.127     |                   0 |
+|   21 | Win_DR_30.166.1.128     | 30.166.1.128     |                   0 |
+|   22 | Win_DR_30.166.1.129     | 30.166.1.129     |                   0 |
+
+
+here you see some has 0 and some has 2 . change all win and lnx to id=2
+
+MariaDB [panaces]> update component set c_SiteController_id=2 where c_ipaddr not in  ('0.0.0.0','0.0.0.1','0.0.0.2','0.0.0.3','30.117.171.11'       ,'30.117.171.14','169.254.225.23','10.100.120.22','10.100.120.22_1','169.254.225.23_1','10.100.106.30','10.100.106.30_1');
+Query OK, 145 rows affected (0.01 sec)
+Rows matched: 169  Changed: 145  Warnings: 0
+
+MariaDB [panaces]> select c_id,c_name,c_ipaddr,c_SiteController_id from component;
++------+-------------------------+------------------+---------------------+
+| c_id | c_name                  | c_ipaddr         | c_SiteController_id |
++------+-------------------------+------------------+---------------------+
+|    1 | __c_other_repl_pri      | 0.0.0.0          |                NULL |
+|    2 | __c_other_repl_dr       | 0.0.0.1          |                NULL |
+|    3 | __c_other_ds_pri        | 0.0.0.2          |                NULL |
+|    4 | __c_other_ds_dr         | 0.0.0.3          |                NULL |
+|    5 | AgentNode               | 30.117.171.11    |                NULL |
+|   12 | HSB_WIN_Site_Controller | 30.117.171.14    |                   2 |
+|   13 | VM_VA22PWVTSM324_0      | 169.254.225.23   |                   0 |
+|   14 | VM_VA22PWVISS010_0      | 10.100.120.22    |                   0 |
+|   15 | VM_DR_VA22PWVISS010_37  | 10.100.120.22_1  |                   0 |
+|   16 | VM_DR_VA22PWVTSM324_47  | 169.254.225.23_1 |                   0 |
+|   17 | VM_VA1EDI01_0           | 10.100.106.30    |                   0 |
+|   18 | VM_DR_VA1EDI01_62       | 10.100.106.30_1  |                   0 |
+|   19 | Win_DR_30.116.72.75     | 30.116.72.75     |                   2 |
+|   20 | Win_DR_30.166.1.127     | 30.166.1.127     |                   2 |
+|   21 | Win_DR_30.166.1.128     | 30.166.1.128     |                   2 |
+|   22 | Win_DR_30.166.1.129     | 30.166.1.129     |                   2 |
+|   23 | Win_DR_30.166.1.130     | 30.166.1.130     |                   2 |
+
+
+you see we have left some ip's because they are not going through Site controller. 
+
+************************How to delete duplicate entries ********************
+
+Here you see there are two duplicate entries for 30.117.171.15. so the one which is sitting on site controller need to remove cause thats vcenter 
+
+
+MariaDB [panaces]> select ac_id,ac_as_id,ac_ipaddress,ac_sitecontroller_id,ac_connectorIP,ac_anode_ip from agent_csa;
++-------+----------+---------------+----------------------+----------------+---------------+
+| ac_id | ac_as_id | ac_ipaddress  | ac_sitecontroller_id | ac_connectorIP | ac_anode_ip   |
++-------+----------+---------------+----------------------+----------------+---------------+
+|     1 |       43 | 30.117.171.11 |                 NULL |                | 30.117.171.11 |
+|     2 |        6 | 30.117.171.11 |                 NULL | 30.117.171.11  | NULL          |
+|     3 |        2 | 30.117.171.14 |                    2 | 30.117.171.14  | NULL          |
+|     4 |        2 | 30.116.32.30  |                 NULL | NULL           | NULL          |
+|     5 |        2 | 30.116.32.32  |                 NULL | NULL           | NULL          |
+|     6 |        2 | 30.116.32.31  |                 NULL | 30.116.32.31   | NULL          |
+|     7 |       35 | 30.117.45.17  |                 NULL | 30.117.45.17   | 30.117.171.11 |
+|     9 |       35 | 30.117.171.15 |                 NULL | 30.117.171.15  | 30.117.171.14 |
+|    10 |       35 | 30.117.171.15 |                 NULL | 30.117.171.15  | 30.117.171.11 |
+
+MariaDB [panaces]> delete from agent_csa where ac_id=9;
+Query OK, 1 row affected (0.00 sec)
+
+**********************How to check site controller id ********************
+
+MariaDB [panaces]> select * from sitecontroller\G;
+*************************** 1. row ***************************
+                   sc_id: 2
+   sc_siteControllerName: SC
+     sc_siteControllerIP: 30.117.171.14
+
+
+*********How to change ac_sitecontroller_id and ac_connector id and ac_anode_ip*******************
+
+MariaDB [panaces]> select ac_id,ac_as_id,ac_ipaddress,ac_sitecontroller_id,ac_connectorIP,ac_anode_ip from agent_csa;
++-------+----------+---------------+----------------------+----------------+---------------+
+| ac_id | ac_as_id | ac_ipaddress  | ac_sitecontroller_id | ac_connectorIP | ac_anode_ip   |
++-------+----------+---------------+----------------------+----------------+---------------+
+|     1 |       43 | 30.117.171.11 |                 NULL |                | 30.117.171.11 |
+|     2 |        6 | 30.117.171.11 |                 NULL | 30.117.171.11  | NULL          |
+|     3 |        2 | 30.117.171.14 |                    2 | 30.117.171.14  | NULL          |
+|     4 |        2 | 30.116.32.30  |                 NULL | NULL           | NULL          |
+|     5 |        2 | 30.116.32.32  |                 NULL | NULL           | NULL          |
+|     6 |        2 | 30.116.32.31  |                 NULL | 30.116.32.31   | NULL          |
+|     7 |       35 | 30.117.45.17  |                 NULL | 30.117.45.17   | 30.117.171.11 |
+|     9 |       35 | 30.117.171.15 |                 NULL | 30.117.171.15  | 30.117.171.14 |
+|    10 |       35 | 30.117.171.15 |                 NULL | 30.117.171.15  | 30.117.171.11 |
+|    11 |       35 | 30.96.144.32  |                 NULL | 30.96.144.32   | 30.117.171.11 |
+|    12 |        2 | 30.116.72.75  |                 NULL | NULL           | 30.117.171.11 |
+|    13 |        2 | 30.166.132.13 |                 NULL | NULL           | 30.117.171.11 |
+|    14 |        2 | 30.166.160.22 |                 NULL | NULL           | 30.117.171.11 |
+|    15 |        2 | 30.166.96.108 |                 NULL | NULL           | 30.117.171.11 |
+|    16 |        2 | 30.166.96.230 |                 NULL | NULL           | 30.117.171.11 |
+|    17 |        2 | 30.96.13.224  |                 NULL | NULL           | 30.117.171.11 |
+|    18 |        2 | 30.96.19.42   |                 NULL | NULL           | 30.117.171.11 |
+|    23 |        2 | 30.166.1.123  |                    2 | NULL           | 30.117.171.14 |
++-------+----------+---------------+----------------------+----------------+---------------+
+
+
+18 rows in set (0.00 sec)
+
+MariaDB [panaces]> update agent_csa set ac_connectorIP='30.166.132.13' where ac_id=13;                                                              
+Query OK, 1 row affected (0.01 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+MariaDB [panaces]> update agent_csa set ac_connectorIP='30.166.160.22' where ac_id=14;
+Query OK, 1 row affected (0.00 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+
+MariaDB [panaces]> update agent_csa set ac_sitecontroller_id=2 where ac_id in (12,13,14,15,16,17,18);
+Query OK, 7 rows affected (0.00 sec)
+Rows matched: 7  Changed: 7  Warnings: 0
+
+MariaDB [panaces]> update agent_csa set ac_anode_ip='30.117.171.14' where ac_id in (12,13,14,15,16,17,18);
+
+MariaDB [panaces]> select ac_id,ac_as_id,ac_ipaddress,ac_sitecontroller_id,ac_connectorIP,ac_anode_                                                 ip from agent_csa;
++-------+----------+---------------+----------------------+----------------+---------------+
+| ac_id | ac_as_id | ac_ipaddress  | ac_sitecontroller_id | ac_connectorIP | ac_anode_ip   |
++-------+----------+---------------+----------------------+----------------+---------------+
+|     1 |       43 | 30.117.171.11 |                 NULL |                | 30.117.171.11 |
+|     2 |        6 | 30.117.171.11 |                 NULL | 30.117.171.11  | NULL          |
+|     3 |        2 | 30.117.171.14 |                    2 | 30.117.171.14  | NULL          |
+|     4 |        2 | 30.116.32.30  |                 NULL | NULL           | NULL          |
+|     5 |        2 | 30.116.32.32  |                 NULL | NULL           | NULL          |
+|     6 |        2 | 30.116.32.31  |                 NULL | 30.116.32.31   | NULL          |
+|     7 |       35 | 30.117.45.17  |                 NULL | 30.117.45.17   | 30.117.171.11 |
+|     9 |       35 | 30.117.171.15 |                 NULL | 30.117.171.15  | 30.117.171.14 |
+|    10 |       35 | 30.117.171.15 |                 NULL | 30.117.171.15  | 30.117.171.11 |
+|    11 |       35 | 30.96.144.32  |                 NULL | 30.96.144.32   | 30.117.171.11 |
+|    12 |        2 | 30.116.72.75  |                    2 | 30.116.72.75   | 30.117.171.14 |
+|    13 |        2 | 30.166.132.13 |                    2 | 30.166.132.13  | 30.117.171.14 |
+|    14 |        2 | 30.166.160.22 |                    2 | 30.166.160.22  | 30.117.171.14 |
+|    15 |        2 | 30.166.96.108 |                    2 | 30.166.96.108  | 30.117.171.14 |
+|    16 |        2 | 30.166.96.230 |                    2 | 30.166.96.230  | 30.117.171.14 |
+|    17 |        2 | 30.96.13.224  |                    2 | 30.96.13.224   | 30.117.171.14 |
+|    18 |        2 | 30.96.19.42   |                    2 | 30.96.19.42    | 30.117.171.14 |
+|    23 |        2 | 30.166.1.123  |                    2 | NULL           | 30.117.171.14 |
++-------+----------+---------------+----------------------+----------------+---------------+
